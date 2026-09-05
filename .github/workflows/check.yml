@@ -2,11 +2,12 @@ name: Check Cinemark
 
 on:
   schedule:
+    # Cada 15 minutos. GitHub puede demorarlo un poco en horas pico, es normal.
     - cron: "*/15 * * * *"
-  workflow_dispatch: {}
+  workflow_dispatch: {}   # permite tirarlo a mano desde la pestaña "Actions"
 
 permissions:
-  contents: write
+  contents: write   # necesario para poder commitear el archivo state.json
 
 jobs:
   check:
@@ -20,8 +21,16 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Cachear navegadores de Playwright
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-chromium
+
       - name: Instalar dependencias
-        run: pip install requests
+        run: |
+          pip install requests playwright
+          playwright install --with-deps chromium
 
       - name: Ejecutar chequeo
         env:
