@@ -12,11 +12,6 @@ MOVIES = [
         "name": "OASIS: DON'T LOOK BACK IN ANGER",
         "url": "https://www.cinemark.com.ar/pelicula/oasis-don-t-look-back-in-anger",
     },
-    # Podés agregar más así:
-    # {
-    #     "name": "OTRA PELICULA",
-    #     "url": "https://www.cinemark.com.ar/pelicula/otra-pelicula",
-    # },
 ]
 
 STATE_FILE = "state.json"
@@ -56,12 +51,6 @@ def send_telegram(text):
 
 
 def get_formatos_disponibles(visible_text):
-    """
-    Busca, en el texto VISIBLE de la página ya renderizada por el navegador,
-    el contenido entre 'Formatos disponibles' y 'Duración'.
-    Vacío -> todavía no hay funciones cargadas.
-    Con contenido -> ya se puede comprar.
-    """
     match = re.search(
         r"Formatos disponibles\s*\n?\s*(.*?)\s*\n\s*Duraci[oó]n",
         visible_text,
@@ -73,9 +62,8 @@ def get_formatos_disponibles(visible_text):
 
 
 def check_movie(page, movie):
-    page.goto(movie["url"], wait_until="networkidle", timeout=45000)
-    # Esperamos un toque extra por si el contenido tarda en hidratar
-    page.wait_for_timeout(2000)
+    page.goto(movie["url"], wait_until="domcontentloaded", timeout=30000)
+    page.wait_for_timeout(4000)
     visible_text = page.inner_text("body")
     return get_formatos_disponibles(visible_text)
 
